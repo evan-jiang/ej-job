@@ -11,7 +11,6 @@ import javax.annotation.Resource;
 
 @Slf4j
 public class MasterListener extends AbstractChildrenListener {
-    @Resource
     MasterOptionService masterOptionService;
 
     public MasterListener() {

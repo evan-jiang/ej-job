@@ -17,7 +17,7 @@ public abstract class AbstractChildrenListener extends BaseService {
 
     protected abstract String zkPath();
 
-    public void listen() throws Exception {
+    public PathChildrenCache listen() throws Exception {
         PathChildrenCache cache = new PathChildrenCache(this.client, this.zkPath(), false);
         cache.getListenable().addListener(new PathChildrenCacheListener() {
             @Override
@@ -38,6 +38,7 @@ public abstract class AbstractChildrenListener extends BaseService {
             }
         });
         cache.start();
+        return cache;
     }
 
     protected abstract void add(CuratorFramework client, String path);

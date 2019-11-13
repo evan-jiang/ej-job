@@ -12,7 +12,7 @@
 
     <appender name="dailyRollingFileAppender" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <FileNamePattern>/opt/logs/ej-tools/out.%d{yyyy-MM-dd}.log</FileNamePattern>
+            <FileNamePattern>/opt/logs/ej-job/out.%d{yyyy-MM-dd}.log</FileNamePattern>
             <maxHistory>30</maxHistory>
         </rollingPolicy>
 
@@ -22,7 +22,7 @@
     </appender>
 
     <root>
-        <level value="info"/>
+        <level value="debug"/>
         <appender-ref ref="consoleAppender"/>
         <appender-ref ref="dailyRollingFileAppender"/>
     </root>

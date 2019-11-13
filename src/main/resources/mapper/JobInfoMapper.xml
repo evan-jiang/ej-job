@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ej.job.dao.JobInfoMapper" >
+
+    <resultMap id="BaseResultMap" type="com.ej.job.domain.JobInfo" >
+        <id column="id" property="id" jdbcType="BIGINT"/>
+        <result column="alert_email" property="alertEmail" jdbcType="VARCHAR"/>
+        <result column="created" property="created" jdbcType="TIMESTAMP"/>
+        <result column="creator" property="creator" jdbcType="VARCHAR"/>
+        <result column="execute_time" property="executeTime" jdbcType="BIGINT"/>
+        <result column="job_cron" property="jobCron" jdbcType="VARCHAR"/>
+        <result column="job_name" property="jobName" jdbcType="VARCHAR"/>
+        <result column="job_partition" property="jobPartition" jdbcType="INTEGER"/>
+        <result column="job_status" property="jobStatus" jdbcType="VARCHAR"/>
+        <result column="modified" property="modified" jdbcType="TIMESTAMP"/>
+        <result column="modifier" property="modifier" jdbcType="VARCHAR"/>
+        <result column="req_method" property="reqMethod" jdbcType="VARCHAR"/>
+        <result column="req_params" property="reqParams" jdbcType="VARCHAR"/>
+        <result column="req_url" property="reqUrl" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="com.ej.job.domain.JobInfo">
+        insert into job_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="alertEmail != null">
+                alert_email,
+            </if>
+            <if test="created != null">
+                created,
+            </if>
+            <if test="creator != null">
+                creator,
+            </if>
+            <if test="executeTime != null">
+                execute_time,
+            </if>
+            <if test="jobCron != null">
+                job_cron,
+            </if>
+            <if test="jobName != null">
+                job_name,
+            </if>
+            <if test="jobPartition != null">
+                job_partition,
+            </if>
+            <if test="jobStatus != null">
+                job_status,
+            </if>
+            <if test="modified != null">
+                modified,
+            </if>
+            <if test="modifier != null">
+                modifier,
+            </if>
+            <if test="reqMethod != null">
+                req_method,
+            </if>
+            <if test="reqParams != null">
+                req_params,
+            </if>
+            <if test="reqUrl != null">
+                req_url,
+            </if>
+        </trim>
+        values
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=BIGINT},
+            </if>
+            <if test="alertEmail != null">
+                #{alertEmail,jdbcType=VARCHAR},
+            </if>
+            <if test="created != null">
+                #{created,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="executeTime != null">
+                #{executeTime,jdbcType=BIGINT},
+            </if>
+            <if test="jobCron != null">
+                #{jobCron,jdbcType=VARCHAR},
+            </if>
+            <if test="jobName != null">
+                #{jobName,jdbcType=VARCHAR},
+            </if>
+            <if test="jobPartition != null">
+                #{jobPartition,jdbcType=INTEGER},
+            </if>
+            <if test="jobStatus != null">
+                #{jobStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="modified != null">
+                #{modified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="reqMethod != null">
+                #{reqMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="reqParams != null">
+                #{reqParams,jdbcType=VARCHAR},
+            </if>
+            <if test="reqUrl != null">
+                #{reqUrl,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+
+    <update id="update">
+        update job_info set
+        <trim prefix="" suffix="" suffixOverrides=",">
+            <if test="alertEmail != null">
+                alert_email = #{alertEmail,jdbcType=VARCHAR},
+            </if>
+            <if test="created != null">
+                created = #{created,jdbcType=TIMESTAMP},
+            </if>
+            <if test="creator != null">
+                creator = #{creator,jdbcType=VARCHAR},
+            </if>
+            <if test="executeTime != null">
+                execute_time = #{executeTime,jdbcType=BIGINT},
+            </if>
+            <if test="jobCron != null">
+                job_cron = #{jobCron,jdbcType=VARCHAR},
+            </if>
+            <if test="jobName != null">
+                job_name = #{jobName,jdbcType=VARCHAR},
+            </if>
+            <if test="jobPartition != null">
+                job_partition = #{jobPartition,jdbcType=INTEGER},
+            </if>
+            <if test="jobStatus != null">
+                job_status = #{jobStatus,jdbcType=VARCHAR},
+            </if>
+            <if test="modified != null">
+                modified = #{modified,jdbcType=TIMESTAMP},
+            </if>
+            <if test="modifier != null">
+                modifier = #{modifier,jdbcType=VARCHAR},
+            </if>
+            <if test="reqMethod != null">
+                req_method = #{reqMethod,jdbcType=VARCHAR},
+            </if>
+            <if test="reqParams != null">
+                req_params = #{reqParams,jdbcType=VARCHAR},
+            </if>
+            <if test="reqUrl != null">
+                req_url = #{reqUrl,jdbcType=VARCHAR},
+            </if>
+        </trim>
+        where
+        id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <select id="selectByPartition" resultMap="BaseResultMap">
+        select * from job_info where job_status = 'Y' and job_partition >= #{begin,jdbcType=INTEGER} and job_partition &lt;= #{end,jdbcType=INTEGER} order by execute_time limit 1
+    </select>
+</mapper>

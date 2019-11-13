@@ -20,6 +20,7 @@ public class MasterOptionService extends BaseService {
     public MasterOptionService(CuratorFramework client) {
         super(client);
     }
+
     public boolean holdMaster() {
         boolean result = Boolean.FALSE;
         InterProcessMutex lock = new InterProcessMutex(client, EJConstants.ZK_LOCK_MASTER);
@@ -57,7 +58,7 @@ public class MasterOptionService extends BaseService {
             if (idx < intervalMode) {
                 ip++;
             }
-            String value = String.format(EJConstants.ZK_INTERVAL_VALUE_TEMPLATE, start + 1, start + ip);
+            String value = String.format(EJConstants.ZK_INTERVAL_VALUE_TEMPLATE, start + 1, EJConstants.SPLIT_STR, start + ip);
             client.setData().forPath(path, value.getBytes());
             log.info("节点[{}]任务区间为:[{}]", list.get(idx), value);
             start += ip;

@@ -6,7 +6,6 @@ import javax.annotation.Resource;
 
 public class BaseService {
 
-    @Resource
     protected CuratorFramework client;
 
     public BaseService() {

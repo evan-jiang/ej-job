@@ -10,6 +10,4 @@ public class EJNodeInfo {
 
     public static volatile Boolean master = Boolean.FALSE;
 
-    public static volatile String intervalName;
-
 }

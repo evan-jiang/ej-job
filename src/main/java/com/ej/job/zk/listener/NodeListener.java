@@ -11,7 +11,6 @@ import javax.annotation.Resource;
 
 @Slf4j
 public class NodeListener extends AbstractChildrenListener {
-    @Resource
     MasterOptionService masterOptionService;
 
     public NodeListener() {
@@ -37,7 +36,7 @@ public class NodeListener extends AbstractChildrenListener {
     protected void add(CuratorFramework client, String path) {
         try {
             String nodeName = getNodeName(path);
-            EJNodeInfo.intervalName = null;
+            cleanPartition();
             log.info("节点[{}]已加入到集群中,需要中断当前任务线程", nodeName);
             if (EJNodeInfo.master) {
                 masterOptionService.refresh();
@@ -51,7 +50,7 @@ public class NodeListener extends AbstractChildrenListener {
     protected void remove(CuratorFramework client, String path) {
         try {
             String nodeName = getNodeName(path);
-            EJNodeInfo.intervalName = null;
+            cleanPartition();
             log.info("节点[{}]已从集群中移除,需要中断当前任务线程", nodeName);
             if (EJNodeInfo.master) {
                 masterOptionService.refresh();
@@ -68,8 +67,9 @@ public class NodeListener extends AbstractChildrenListener {
             if (!EJNodeInfo.nodeName.equals(nodeName)) {
                 return;
             }
-            EJNodeInfo.intervalName = new String(client.getData().forPath(path));
-            log.info("当前节点[{}]已被重新分配任务区间:[{}],需要唤醒当前任务线程", nodeName, EJNodeInfo.intervalName);
+            String partitionInterval = new String(client.getData().forPath(path));
+            setPartition(partitionInterval);
+            log.info("当前节点[{}]已被重新分配任务区间:[{}],需要唤醒当前任务线程", nodeName, partitionInterval);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -77,5 +77,29 @@ public class NodeListener extends AbstractChildrenListener {
 
     private String getNodeName(String path) {
         return path.substring(path.lastIndexOf(EJConstants.SLASH) + 1);
+    }
+
+    private void cleanPartition(){
+        EJConstants.SUSPENDED.set(Boolean.TRUE);
+        EJConstants.BEGIN.set(0);
+        EJConstants.END.set(0);
+    }
+
+    private void setPartition(String partitionInterval){
+        String[] split = partitionInterval.split(EJConstants.SPLIT_STR);
+        if(split == null || split.length != 2){
+            log.info("任务区间格式有误:{}",partitionInterval);
+            return;
+        }
+        try {
+            int b = Integer.parseInt(split[0]);
+            int e = Integer.parseInt(split[1]);
+            EJConstants.SUSPENDED.set(Boolean.FALSE);
+            EJConstants.BEGIN.set(b);
+            EJConstants.END.set(e);
+        } catch (NumberFormatException ex) {
+            log.info("任务区间格式有误:{}",partitionInterval);
+        }
+
     }
 }
