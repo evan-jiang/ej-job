@@ -162,4 +162,8 @@
     <select id="selectByPartition" resultMap="BaseResultMap">
         select * from job_info where job_status = 'Y' and job_partition >= #{begin,jdbcType=INTEGER} and job_partition &lt;= #{end,jdbcType=INTEGER} order by execute_time limit 1
     </select>
+
+    <select id="selectRecentExecuteByPartition" resultMap="BaseResultMap">
+        select * from job_info where job_status = 'Y' and job_partition >= #{begin,jdbcType=INTEGER} and job_partition &lt;= #{end,jdbcType=INTEGER} and execute_time &lt;= #{recentExecuteTime,jdbcType=BIGINT} order by execute_time limit 50
+    </select>
 </mapper>

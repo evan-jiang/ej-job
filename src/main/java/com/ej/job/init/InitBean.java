@@ -1,12 +1,11 @@
 package com.ej.job.init;
 
 import com.ej.job.dao.JobInfoMapper;
-import com.ej.job.runner.JobExecutor;
+import com.ej.job.runner.JobManager;
 import com.ej.job.zk.listener.MasterListener;
 import com.ej.job.zk.listener.NodeListener;
 import com.ej.job.zk.option.MasterOptionService;
 import com.ej.job.zk.option.NodeOptionService;
-import jdk.nashorn.internal.runtime.regexp.joni.exception.JOniException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
@@ -17,14 +16,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.IOException;
-
 @Configuration
 @Slf4j
 public class InitBean {
 
     @Value("${ej.job.zk.host}")
     private String host;
+
+    @Bean
+    public JobManager jobManager(JobInfoMapper jobInfoMapper) {
+        return new JobManager(jobInfoMapper);
+    }
 
     @Bean
     public CuratorFramework client() {
@@ -50,21 +52,22 @@ public class InitBean {
     }
 
     @Bean
-    public NodeListener nodeListener(CuratorFramework client, MasterOptionService masterOptionService) {
-        return new NodeListener(client, masterOptionService);
+    public NodeListener nodeListener(CuratorFramework client, MasterOptionService masterOptionService, JobManager jobManager) {
+        return new NodeListener(client, masterOptionService, jobManager);
     }
 
-    @Bean
-    public JobExecutor jobExecutor(JobInfoMapper jobInfoMapper){
-        return new JobExecutor(jobInfoMapper);
-    }
+
+//    @Bean
+//    public JobExecutor jobExecutor(JobInfoMapper jobInfoMapper) {
+//        return new JobExecutor(jobInfoMapper);
+//    }
 
     @Bean
     public Object object(final CuratorFramework client, MasterOptionService masterOptionService,
                          NodeOptionService nodeOptionService,
                          MasterListener masterListener,
-                         NodeListener nodeListener, JobExecutor jobExecutor) throws Exception {
-        new Thread(jobExecutor).start();
+                         NodeListener nodeListener) throws Exception {
+        //new Thread(jobExecutor).start();
         final PathChildrenCache ml = masterListener.listen();
         masterOptionService.holdMaster();
         final PathChildrenCache nl = nodeListener.listen();
@@ -78,7 +81,7 @@ public class InitBean {
                     nl.close();
                     client.close();
                 } catch (Exception e) {
-                    log.error("关闭zookeeper资源异常",e);
+                    log.error("关闭zookeeper资源异常", e);
                 }
             }
         }));

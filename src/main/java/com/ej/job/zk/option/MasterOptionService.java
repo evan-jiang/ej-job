@@ -1,7 +1,6 @@
 package com.ej.job.zk.option;
 
 import com.ej.job.constants.EJConstants;
-import com.ej.job.container.EJNodeInfo;
 import com.ej.job.zk.BaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -28,7 +27,7 @@ public class MasterOptionService extends BaseService {
             lock.acquire();
             Stat stat = client.checkExists().forPath(EJConstants.ZK_MASTER_PATH);
             if (stat == null) {
-                client.create().withMode(CreateMode.EPHEMERAL).forPath(EJConstants.ZK_MASTER_PATH, EJNodeInfo.nodeName.getBytes());
+                client.create().withMode(CreateMode.EPHEMERAL).forPath(EJConstants.ZK_MASTER_PATH, EJConstants.NODE_NAME.getBytes());
                 result = Boolean.TRUE;
             }
         } catch (Exception e) {
@@ -49,16 +48,16 @@ public class MasterOptionService extends BaseService {
         if (list == null || list.isEmpty()) {
             return;
         }
-        int intervalPage = EJNodeInfo.intervalTotal / list.size();
-        int intervalMode = EJNodeInfo.intervalTotal % list.size();
+        int partitionPage = EJConstants.PARTITION_TOTAL / list.size();
+        int partitionMode = EJConstants.PARTITION_TOTAL % list.size();
         int start = 0;
         for (int idx = 0; idx < list.size(); idx++) {
             String path = EJConstants.ZK_NODE_BASE + EJConstants.SLASH + list.get(idx);
-            int ip = intervalPage;
-            if (idx < intervalMode) {
+            int ip = partitionPage;
+            if (idx < partitionMode) {
                 ip++;
             }
-            String value = String.format(EJConstants.ZK_INTERVAL_VALUE_TEMPLATE, start + 1, EJConstants.SPLIT_STR, start + ip);
+            String value = String.format(EJConstants.ZK_PARTITION_VALUE_TEMPLATE, start + 1, EJConstants.SPLIT_STR, start + ip);
             client.setData().forPath(path, value.getBytes());
             log.info("节点[{}]任务区间为:[{}]", list.get(idx), value);
             start += ip;

@@ -1,7 +1,6 @@
 package com.ej.job.web;
 
 import com.ej.job.constants.EJConstants;
-import com.ej.job.container.EJNodeInfo;
 import com.ej.job.dao.JobInfoMapper;
 import com.ej.job.domain.JobInfo;
 import org.quartz.CronExpression;
@@ -23,12 +22,12 @@ public class JobInfoWeb {
 
     @RequestMapping("add")
     @ResponseBody
-    public Object add(){
+    public Object add() {
         JobInfo jobInfo = new JobInfo();
         jobInfo.setJobName("test");
         jobInfo.setAlertEmail("jiangyongsheng@zhongan.com");
         jobInfo.setJobCron("0/5 * * * * ? *");
-        jobInfo.setJobPartition(new Random().nextInt(EJNodeInfo.intervalTotal) + 1);
+        jobInfo.setJobPartition(new Random().nextInt(EJConstants.PARTITION_TOTAL) + 1);
         jobInfo.setJobStatus("Y");
         jobInfo.setReqMethod("GET");
         jobInfo.setReqUrl("http://www.tdpark.com");

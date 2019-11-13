@@ -1,17 +1,16 @@
 package com.ej.job.zk.listener;
 
 import com.ej.job.constants.EJConstants;
-import com.ej.job.container.EJNodeInfo;
+import com.ej.job.runner.JobManager;
 import com.ej.job.zk.AbstractChildrenListener;
 import com.ej.job.zk.option.MasterOptionService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 
-import javax.annotation.Resource;
-
 @Slf4j
 public class NodeListener extends AbstractChildrenListener {
     MasterOptionService masterOptionService;
+    JobManager jobManager;
 
     public NodeListener() {
         super();
@@ -22,9 +21,10 @@ public class NodeListener extends AbstractChildrenListener {
     }
 
 
-    public NodeListener(CuratorFramework client,MasterOptionService masterOptionService) {
+    public NodeListener(CuratorFramework client, MasterOptionService masterOptionService,JobManager jobManager) {
         super(client);
         this.masterOptionService = masterOptionService;
+        this.jobManager = jobManager;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class NodeListener extends AbstractChildrenListener {
             String nodeName = getNodeName(path);
             cleanPartition();
             log.info("节点[{}]已加入到集群中,需要中断当前任务线程", nodeName);
-            if (EJNodeInfo.master) {
+            if (EJConstants.IS_MASTER.get()) {
                 masterOptionService.refresh();
             }
         } catch (Exception e) {
@@ -52,7 +52,7 @@ public class NodeListener extends AbstractChildrenListener {
             String nodeName = getNodeName(path);
             cleanPartition();
             log.info("节点[{}]已从集群中移除,需要中断当前任务线程", nodeName);
-            if (EJNodeInfo.master) {
+            if (EJConstants.IS_MASTER.get()) {
                 masterOptionService.refresh();
             }
         } catch (Exception e) {
@@ -64,7 +64,7 @@ public class NodeListener extends AbstractChildrenListener {
     protected void update(CuratorFramework client, String path) {
         try {
             String nodeName = getNodeName(path);
-            if (!EJNodeInfo.nodeName.equals(nodeName)) {
+            if (!EJConstants.NODE_NAME.equals(nodeName)) {
                 return;
             }
             String partitionInterval = new String(client.getData().forPath(path));
@@ -79,26 +79,28 @@ public class NodeListener extends AbstractChildrenListener {
         return path.substring(path.lastIndexOf(EJConstants.SLASH) + 1);
     }
 
-    private void cleanPartition(){
-        EJConstants.SUSPENDED.set(Boolean.TRUE);
-        EJConstants.BEGIN.set(0);
-        EJConstants.END.set(0);
+    private void cleanPartition() {
+//        EJConstants.SUSPENDED.set(Boolean.TRUE);
+//        EJConstants.BEGIN.set(0);
+//        EJConstants.END.set(0);
+        jobManager.stop();
     }
 
-    private void setPartition(String partitionInterval){
+    private void setPartition(String partitionInterval) {
         String[] split = partitionInterval.split(EJConstants.SPLIT_STR);
-        if(split == null || split.length != 2){
-            log.info("任务区间格式有误:{}",partitionInterval);
+        if (split == null || split.length != 2) {
+            log.info("任务区间格式有误:{}", partitionInterval);
             return;
         }
         try {
             int b = Integer.parseInt(split[0]);
             int e = Integer.parseInt(split[1]);
-            EJConstants.SUSPENDED.set(Boolean.FALSE);
-            EJConstants.BEGIN.set(b);
-            EJConstants.END.set(e);
+            jobManager.restart(b,e);
+//            EJConstants.SUSPENDED.set(Boolean.FALSE);
+//            EJConstants.BEGIN.set(b);
+//            EJConstants.END.set(e);
         } catch (NumberFormatException ex) {
-            log.info("任务区间格式有误:{}",partitionInterval);
+            log.info("任务区间格式有误:{}", partitionInterval);
         }
 
     }
