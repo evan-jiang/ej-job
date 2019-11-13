@@ -38,14 +38,4 @@ public class EJConstants {
     private static final String ZK_LOCK_BASE = ZK_ROOT_PATH + SLASH + "lock";
     public static final String ZK_LOCK_MASTER = ZK_LOCK_BASE + SLASH + "master";
 
-    /**执行线程开关**/
-    public static final AtomicBoolean SHUTDOWN = new AtomicBoolean(Boolean.FALSE);
-    /**执行线程是否暂停(伪暂停)**/
-    public static final AtomicBoolean SUSPENDED = new AtomicBoolean(Boolean.FALSE);
-    /**执行区间起点**/
-    public static final AtomicInteger BEGIN = new AtomicInteger(0);
-    /**执行区间终点**/
-    public static final AtomicInteger END = new AtomicInteger(0);
-    /**执行线程锁对象**/
-    public static final Object JOB_LOCK = new Object();
 }

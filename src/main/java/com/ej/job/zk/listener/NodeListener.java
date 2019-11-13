@@ -80,9 +80,6 @@ public class NodeListener extends AbstractChildrenListener {
     }
 
     private void cleanPartition() {
-//        EJConstants.SUSPENDED.set(Boolean.TRUE);
-//        EJConstants.BEGIN.set(0);
-//        EJConstants.END.set(0);
         jobManager.stop();
     }
 
@@ -96,9 +93,6 @@ public class NodeListener extends AbstractChildrenListener {
             int b = Integer.parseInt(split[0]);
             int e = Integer.parseInt(split[1]);
             jobManager.restart(b,e);
-//            EJConstants.SUSPENDED.set(Boolean.FALSE);
-//            EJConstants.BEGIN.set(b);
-//            EJConstants.END.set(e);
         } catch (NumberFormatException ex) {
             log.info("任务区间格式有误:{}", partitionInterval);
         }
