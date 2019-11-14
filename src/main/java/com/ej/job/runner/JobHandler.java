@@ -1,7 +1,9 @@
 package com.ej.job.runner;
 
+import com.ej.job.constants.EJConstants;
 import com.ej.job.dao.JobInfoMapper;
 import com.ej.job.domain.JobInfo;
+import com.ej.job.enums.JobStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronExpression;
 
@@ -112,7 +114,7 @@ public class JobHandler implements Runnable {
             log.debug("没有可执行区间");
             return null;
         }
-        return jobInfoMapper.selectRecentExecuteByPartition(begin.get(), end.get(), System.currentTimeMillis() + NULL_DATA_WAIT);
+        return jobInfoMapper.selectRecentExecute(begin.get(), end.get(), System.currentTimeMillis() + NULL_DATA_WAIT, JobStatus.Y.name(), EJConstants.HANDLER_QUERY_PAGE_SIZE);
     }
 
     protected void refresh(JobInfo jobInfo) {

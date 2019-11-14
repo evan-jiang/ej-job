@@ -13,7 +13,5 @@ public interface JobInfoMapper {
 
     public int update(JobInfo jobInfo);
 
-    public JobInfo selectByPartition(@Param("begin") Integer begin, @Param("end") Integer end);
-
-    public List<JobInfo> selectRecentExecuteByPartition(@Param("begin") Integer begin, @Param("end") Integer end, @Param("recentExecuteTime") Long recentExecuteTime);
+    public List<JobInfo> selectRecentExecute(@Param("begin") Integer begin, @Param("end") Integer end, @Param("recentExecuteTime") Long recentExecuteTime, @Param("jobStatus") String jobStatus, @Param("pageSize") Integer pageSize);
 }
