@@ -104,7 +104,7 @@ public class JobHandler implements Runnable {
                     }
                     if (shutdown.get()) {
                         log.debug("执行区间已被刷新或者被清空,需要中断执行");
-                        continue;
+                        return;
                     } else {
                         doAndLog(jobInfo);
                     }
