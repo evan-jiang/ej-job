@@ -1,6 +1,7 @@
 package com.ej.job.init;
 
 import com.ej.job.dao.JobInfoMapper;
+import com.ej.job.dao.JobLogMapper;
 import com.ej.job.runner.JobManager;
 import com.ej.job.zk.listener.MasterListener;
 import com.ej.job.zk.listener.NodeListener;
@@ -24,8 +25,8 @@ public class InitBean {
     private String host;
 
     @Bean
-    public JobManager jobManager(JobInfoMapper jobInfoMapper) {
-        return new JobManager(jobInfoMapper);
+    public JobManager jobManager(JobInfoMapper jobInfoMapper, JobLogMapper jobLogMapper) {
+        return new JobManager(jobInfoMapper, jobLogMapper);
     }
 
     @Bean

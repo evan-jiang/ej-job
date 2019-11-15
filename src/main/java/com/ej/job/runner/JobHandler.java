@@ -1,9 +1,14 @@
 package com.ej.job.runner;
 
+import com.alibaba.fastjson.JSON;
 import com.ej.job.constants.EJConstants;
 import com.ej.job.dao.JobInfoMapper;
+import com.ej.job.dao.JobLogMapper;
 import com.ej.job.domain.JobInfo;
+import com.ej.job.domain.JobLog;
+import com.ej.job.enums.HttpStatus;
 import com.ej.job.enums.JobStatus;
+import com.ej.job.utils.HttpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.CronExpression;
 
@@ -34,11 +39,13 @@ public class JobHandler implements Runnable {
     private AtomicInteger begin;
     private AtomicInteger end;
     private JobInfoMapper jobInfoMapper;
+    private JobLogMapper jobLogMapper;
 
-    public JobHandler(int begin, int end, JobInfoMapper jobInfoMapper) {
+    public JobHandler(int begin, int end, JobInfoMapper jobInfoMapper,JobLogMapper jobLogMapper) {
         this.begin = new AtomicInteger(begin);
         this.end = new AtomicInteger(end);
         this.jobInfoMapper = jobInfoMapper;
+        this.jobLogMapper = jobLogMapper;
         this.shutdown = new AtomicBoolean(Boolean.FALSE);
     }
 
@@ -99,9 +106,7 @@ public class JobHandler implements Runnable {
                         log.debug("执行区间已被刷新或者被清空,需要中断执行");
                         continue;
                     } else {
-                        //doing
-                        log.info("数据被执行执行 >>> {}", jobInfo.getId());
-                        refresh(jobInfo);
+                        doAndLog(jobInfo);
                     }
                 }
             }
@@ -109,7 +114,24 @@ public class JobHandler implements Runnable {
         log.info("任务区间[{},{}]任务停止", begin.intValue(), end.intValue());
     }
 
-    protected List<JobInfo> getJobInfoList() {
+    private void doAndLog(JobInfo jobInfo) {
+        String result = null;
+        Long begin = System.currentTimeMillis();
+        Long end = 0L;
+        try {
+            result = HttpUtils.doRequest(jobInfo);
+            end = System.currentTimeMillis();
+        } catch (Exception e) {
+            end = System.currentTimeMillis();
+            log.error("任务执行异常，任务数据:{}", JSON.toJSONString(jobInfo));
+            result = Exception.class.getSimpleName();
+        } finally {
+            saveLog(jobInfo,begin,end,result);
+            refresh(jobInfo);
+        }
+    }
+
+    private List<JobInfo> getJobInfoList() {
         if (shutdown.get() || begin.intValue() < 1 || end.intValue() < 1) {
             log.debug("没有可执行区间");
             return null;
@@ -117,7 +139,7 @@ public class JobHandler implements Runnable {
         return jobInfoMapper.selectRecentExecute(begin.get(), end.get(), System.currentTimeMillis() + NULL_DATA_WAIT, JobStatus.Y.name(), EJConstants.HANDLER_QUERY_PAGE_SIZE);
     }
 
-    protected void refresh(JobInfo jobInfo) {
+    private void refresh(JobInfo jobInfo) {
         try {
             jobInfo.setExecuteTime(new CronExpression(jobInfo.getJobCron()).getNextValidTimeAfter(new Date()).getTime());
             jobInfoMapper.update(jobInfo);
@@ -125,6 +147,25 @@ public class JobHandler implements Runnable {
             log.error("Cron表达式[{}]解析异常", jobInfo.getJobCron(), e);
         } catch (Exception e) {
             log.error("更新下一次执行时间异常", e);
+        }
+    }
+
+    private void saveLog(JobInfo jobInfo,long begin,long end,String result){
+        try {
+            JobLog jobLog = new JobLog();
+            jobLog.setJobId(jobInfo.getId());
+            jobLog.setJobName(jobInfo.getJobName());
+            jobLog.setReqMethod(jobInfo.getReqMethod());
+            jobLog.setReqParams(jobInfo.getReqParams());
+            jobLog.setReqUrl(jobInfo.getReqUrl());
+            jobLog.setBeginTime(begin);
+            jobLog.setEndTime(end);
+            HttpStatus status = HttpStatus.getEnum(result);
+            jobLog.setRespMsg(result);
+            jobLog.setExecuteStatus(status.getStatus());
+            jobLogMapper.insert(jobLog);
+        } catch (Exception e) {
+            log.error("报错执行日志异常", e);
         }
     }
 }

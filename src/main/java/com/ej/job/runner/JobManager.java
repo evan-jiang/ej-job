@@ -1,6 +1,7 @@
 package com.ej.job.runner;
 
 import com.ej.job.dao.JobInfoMapper;
+import com.ej.job.dao.JobLogMapper;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -12,11 +13,13 @@ public class JobManager {
     private final static Integer NODE_HANDLER_THREAD_TOTAL = 8;
 
     private JobInfoMapper jobInfoMapper;
+    private JobLogMapper jobLogMapper;
     private List<JobHandler> handlers;
     private List<Thread> threads;
 
-    public JobManager(JobInfoMapper jobInfoMapper){
+    public JobManager(JobInfoMapper jobInfoMapper,JobLogMapper jobLogMapper) {
         this.jobInfoMapper = jobInfoMapper;
+        this.jobLogMapper = jobLogMapper;
         this.handlers = new ArrayList<>();
         this.threads = new ArrayList<>();
     }
@@ -82,7 +85,7 @@ public class JobManager {
             if (idx < partitionMode) {
                 tidx++;
             }
-            JobHandler jobHandler = new JobHandler(start + 1, start + tidx, jobInfoMapper);
+            JobHandler jobHandler = new JobHandler(start + 1, start + tidx, jobInfoMapper, jobLogMapper);
             Thread thread = new Thread(jobHandler);
             handlers.add(jobHandler);
             threads.add(thread);
