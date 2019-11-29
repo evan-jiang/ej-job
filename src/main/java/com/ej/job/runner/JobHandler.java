@@ -35,30 +35,28 @@ public class JobHandler implements Runnable {
      **/
     private static final Long EXPIRE_NOT_EXECUTE_TIME = 5000L;
 
-    private AtomicBoolean shutdown;
-    private AtomicInteger begin;
-    private AtomicInteger end;
+    private volatile boolean shutdown;
+    private volatile int begin;
+    private volatile int end;
     private JobInfoMapper jobInfoMapper;
     private JobLogMapper jobLogMapper;
 
     public JobHandler(int begin, int end, JobInfoMapper jobInfoMapper,JobLogMapper jobLogMapper) {
-        this.begin = new AtomicInteger(begin);
-        this.end = new AtomicInteger(end);
+        this.shutdown = Boolean.FALSE;
+        this.begin = begin;
+        this.end = end;
         this.jobInfoMapper = jobInfoMapper;
         this.jobLogMapper = jobLogMapper;
-        this.shutdown = new AtomicBoolean(Boolean.FALSE);
     }
 
 
     public void stop() {
-        shutdown.set(Boolean.TRUE);
-        begin.set(0);
-        end.set(0);
+        shutdown = Boolean.TRUE;
     }
 
     @Override
     public void run() {
-        while (!shutdown.get()) {
+        while (!shutdown) {
             List<JobInfo> jobInfoList = getJobInfoList();
             if (jobInfoList == null || jobInfoList.isEmpty()) {
                 synchronized (this) {
@@ -102,7 +100,7 @@ public class JobHandler implements Runnable {
                             }
                         }
                     }
-                    if (shutdown.get()) {
+                    if (shutdown) {
                         log.debug("执行区间已被刷新或者被清空,需要中断执行");
                         return;
                     } else {
@@ -111,7 +109,7 @@ public class JobHandler implements Runnable {
                 }
             }
         }
-        log.info("任务区间[{},{}]任务停止", begin.intValue(), end.intValue());
+        log.info("任务区间[{},{}]任务停止", begin, end);
     }
 
     private void doAndLog(JobInfo jobInfo) {
@@ -132,11 +130,15 @@ public class JobHandler implements Runnable {
     }
 
     private List<JobInfo> getJobInfoList() {
-        if (shutdown.get() || begin.intValue() < 1 || end.intValue() < 1) {
+        if (begin < 1 || end < 1) {
             log.debug("没有可执行区间");
             return null;
         }
-        return jobInfoMapper.selectRecentExecute(begin.get(), end.get(), System.currentTimeMillis() + NULL_DATA_WAIT, JobStatus.Y.name(), EJConstants.HANDLER_QUERY_PAGE_SIZE);
+        if(shutdown){
+            log.debug("执行任务已被强制停止");
+            return null;
+        }
+        return jobInfoMapper.selectRecentExecute(begin, end, System.currentTimeMillis() + NULL_DATA_WAIT, JobStatus.Y.name(), EJConstants.HANDLER_QUERY_PAGE_SIZE);
     }
 
     private void refresh(JobInfo jobInfo) {

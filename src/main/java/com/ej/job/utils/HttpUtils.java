@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 public class HttpUtils {
 
     public static String doRequest(JobInfo jobInfo){
-        log.info(">>>>>>>>>>>>>>>>>>>>>>>>>{}",jobInfo.getId());
+        log.info("{}>>>>>>>>>>>>>>>>>>>>>>>>>{}",Thread.currentThread().getName(),jobInfo.getId());
         return HttpStatus._200.getCode();
     }
 }
