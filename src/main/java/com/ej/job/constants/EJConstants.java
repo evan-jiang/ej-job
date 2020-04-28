@@ -27,7 +27,7 @@ public class EJConstants {
     /**
      * 项目zk根目录
      **/
-    private static final String ZK_ROOT_PATH = SLASH + "ej_job";
+    public static final String ZK_ROOT_PATH = SLASH + "ej_job";
 
     /**
      * master目录

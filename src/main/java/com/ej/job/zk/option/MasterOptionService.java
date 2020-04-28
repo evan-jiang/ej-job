@@ -44,6 +44,11 @@ public class MasterOptionService extends BaseService {
 
     public void refresh() throws Exception {
         log.info("开始分配任务区间...");
+        Stat stat = client.checkExists().forPath(EJConstants.ZK_NODE_BASE);
+        if(stat == null){
+            log.info("还没有任何节点,暂时不分配任务区间");
+            return;
+        }
         List<String> list = client.getChildren().forPath(EJConstants.ZK_NODE_BASE);
         if (list == null || list.isEmpty()) {
             return;
