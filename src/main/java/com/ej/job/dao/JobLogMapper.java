@@ -1,8 +1,8 @@
 package com.ej.job.dao;
 
+import com.ej.job.domain.JobLog;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import com.ej.job.domain.JobLog;
 
 @Mapper
 public interface JobLogMapper{

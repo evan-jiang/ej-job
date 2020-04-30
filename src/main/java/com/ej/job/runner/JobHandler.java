@@ -15,8 +15,6 @@ import org.quartz.CronExpression;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 @Slf4j
 public class JobHandler implements Runnable {

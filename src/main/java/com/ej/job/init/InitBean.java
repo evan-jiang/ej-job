@@ -1,9 +1,9 @@
 package com.ej.job.init;
 
 import com.ej.job.constants.EJConstants;
+import com.ej.job.runner.JobManager;
 import com.ej.job.dao.JobInfoMapper;
 import com.ej.job.dao.JobLogMapper;
-import com.ej.job.runner.JobManager;
 import com.ej.job.zk.listener.MasterListener;
 import com.ej.job.zk.listener.NodeListener;
 import com.ej.job.zk.option.MasterOptionService;
@@ -16,7 +16,6 @@ import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.locks.InterProcessMutex;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
