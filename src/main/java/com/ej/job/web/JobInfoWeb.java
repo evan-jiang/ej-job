@@ -25,7 +25,7 @@ public class JobInfoWeb {
     public Object add() {
         JobInfo jobInfo = new JobInfo();
         jobInfo.setJobName("test");
-        jobInfo.setAlertEmail("jiangyongsheng@zhongan.com");
+        jobInfo.setAlertEmail("jiangyongsheng@163.com");
         jobInfo.setJobCron("0/5 * * * * ? *");
         jobInfo.setJobPartition(new Random().nextInt(EJConstants.PARTITION_TOTAL) + 1);
         jobInfo.setJobStatus("Y");
